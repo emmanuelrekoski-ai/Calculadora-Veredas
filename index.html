@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a237e">
+<title>Calculadora Veredas</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --blue:#1a237e;--blue-dark:#0d1457;--blue-mid:#283593;
+  --green:#1b5e20;--green2:#2e7d32;
+  --purple:#311b92;--indigo:#283593;
+  --red:#7f0000;--danger:#b71c1c;
+  --amber:#bf360c;--brown:#4e342e;--gray:#263238;
+  --bg:#f0f2f5;--card:#fff;--border:#cfd8dc;
+  --text:#102027;--muted:#546e7a;--subtle:#78909c;
+  --nav-h:64px;--top-h:56px;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;color:var(--text)}
+/* ── LAYOUT ── */
+#app{display:flex;flex-direction:column;height:100%;height:100dvh}
+#topbar{height:var(--top-h);background:var(--blue);color:#fff;display:flex;align-items:center;padding:0 1rem;gap:10px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#topbar h1{font-size:16px;font-weight:700;flex:1;letter-spacing:.01em}
+#topbar .badge{background:#e53935;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;min-width:20px;text-align:center}
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:12px 12px 80px}
+#navbar{height:var(--nav-h);background:#fff;border-top:1px solid var(--border);display:flex;flex-shrink:0;box-shadow:0 -2px 8px rgba(0,0,0,.08)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;cursor:pointer;color:var(--subtle);font-size:10px;font-weight:600;padding:6px 0;transition:color .15s}
+.nav-btn.active{color:var(--blue)}
+.nav-btn svg{width:24px;height:24px;stroke-width:2}
+.nav-btn .nb{position:relative;display:flex;align-items:center;justify-content:center}
+.nav-btn .dot{position:absolute;top:-3px;right:-8px;background:#e53935;color:#fff;font-size:9px;font-weight:800;padding:1px 4px;border-radius:8px;min-width:16px;text-align:center}
+/* ── PANELS ── */
+.panel{display:none}.panel.active{display:block}
+/* ── CARDS ── */
+.card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:1px solid var(--border)}
+.card.active-dir{border:2px solid var(--blue);background:#f8f9ff}
+.card.new-dir{background:#e8edf2;border-color:#b0bec5}
+/* ── DIR LABEL ── */
+.dir-label{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+/* ── SECTIONS ── */
+.sec{border-radius:10px;padding:12px;margin-bottom:10px;border:1px solid}
+.sec.default{background:#f5f7fa;border-color:#b0bec5}
+.sec.cord{background:#f0ebfa;border-color:#7c4dff}
+.sec.disc{background:#fdecea;border-color:#ef9a9a}
+.sec.plant-pos{background:#e8f5e9;border-color:#81c784}
+.sec.trap-sec{background:#fff8e1;border-color:#ffd54f}
+.sec.circ-sec{background:#ede7f6;border-color:#9575cd}
+.sec.disc2{background:#fff8e1;border-color:#ffd54f}
+.sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sec-title.default{color:#37474f}.sec-title.cord{color:#4527a0}.sec-title.disc{color:#7f0000}
+.sec-title.plant-pos{color:#1b5e20}.sec-title.trap-sec{color:#5d4037}.sec-title.circ-sec{color:#4527a0}.sec-title.disc2{color:#5d4037}
+/* ── FORM ── */
+.fld{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.fld label{font-size:12px;color:#37474f;font-weight:700}
+.fld input,.fld select{font-size:15px;height:44px;border:1.5px solid #90a4ae;border-radius:8px;padding:0 12px;background:#fff;color:var(--text);outline:none;width:100%;appearance:none;-webkit-appearance:none}
+.fld input:focus,.fld select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,35,126,.12)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+/* ── BUTTONS ── */
+.btn{font-size:14px;font-weight:700;height:44px;padding:0 16px;border-radius:10px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;width:100%;margin-bottom:6px;transition:opacity .12s,transform .08s}
+.btn:active{opacity:.85;transform:scale(.98)}
+.btn.blue{background:var(--blue);color:#fff}
+.btn.green{background:var(--green);color:#fff}
+.btn.green2{background:var(--green2);color:#fff}
+.btn.amber{background:var(--amber);color:#fff}
+.btn.purple{background:var(--purple);color:#fff}
+.btn.indigo{background:var(--indigo);color:#fff}
+.btn.red{background:var(--red);color:#fff}
+.btn.gray{background:var(--gray);color:#fff}
+.btn.brown{background:var(--brown);color:#fff}
+.btn.danger{background:var(--danger);color:#fff}
+.btn.outline{background:#fff;border:1.5px solid var(--border);color:var(--text)}
+.btn.sm{height:36px;font-size:13px;margin-bottom:0}
+.btn.volon{background:#0d47a1;color:#fff}
+.btn.voloff{background:#37474f;color:#fff}
+.btn-row{display:flex;gap:8px}
+.btn-row .btn{flex:1}
+/* ── TAGS / CHIPS ── */
+.tag{display:inline-block;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:700;color:#fff}
+.tag.rect{background:#1565c0}.tag.tri{background:#2e7d32}.tag.trap{background:#e65100}.tag.circ{background:#6a1b9a}
+.tag.cord{background:#4527a0}.tag.disc{background:#7f0000}.tag.plant{background:#2e7d32}
+.tag.ptrap{background:#795548}.tag.pcirc{background:#4527a0}.tag.dtrap{background:#795548}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{background:var(--blue);color:#fff;border-radius:6px;padding:5px 10px;font-size:12px;font-weight:700}
+.chip.cord{background:var(--purple)}.chip.dv{background:var(--amber)}.chip.pos{background:var(--green2)}
+/* ── PREVIEW ── */
+.preview{border-radius:8px;padding:10px 12px;margin:8px 0;font-size:13px;font-weight:700;border:1.5px solid}
+.preview.disc{border-color:#bf360c;background:#fff3e0;color:#37474f}
+.preview.pos{border-color:#2e7d32;background:#f1f8e9;color:#37474f}
+.preview.trap{border-color:#f9a825;background:#fffde7;color:#37474f}
+.preview.circ{border-color:#512da8;background:#ede7f6;color:#37474f}
+.preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.preview-item label{font-size:10px;font-weight:700;color:var(--muted);display:block}
+.preview-item span{font-size:15px;font-weight:800}
+.vr{color:#7f0000}.vg{color:#1b5e20}.vb{color:#311b92}
+/* ── NOTE ── */
+.note{font-size:11px;font-weight:600;border-radius:6px;padding:7px 10px;margin-bottom:8px;line-height:1.5;border-left:3px solid}
+.note.disc{color:#4a0000;background:#ffebee;border-color:#7f0000}
+.note.pos{color:#1b5e20;background:#e8f5e9;border-color:#2e7d32}
+.note.trap{color:#5d4037;background:#fff8e1;border-color:#f9a825}
+.note.circ{color:#311b92;background:#ede7f6;border-color:#512da8}
+/* ── ITEMS TABLE ── */
+.items-list{margin-top:10px}
+.item-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #eceff1}
+.item-row:last-child{border-bottom:none}
+.item-info{flex:1;min-width:0}
+.item-det{font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-vals{text-align:right;flex-shrink:0}
+.item-vals .v1{font-size:12px;font-weight:700;color:var(--text)}
+.item-vals .v2{font-size:11px;color:var(--muted)}
+.item-del{background:none;border:none;color:#b71c1c;font-size:18px;cursor:pointer;padding:4px;flex-shrink:0;line-height:1}
+/* ── DIR CARDS (closed) ── */
+.dir-card{border-radius:12px;margin-bottom:10px;overflow:hidden;border:2px solid var(--green)}
+.dir-head{background:#c8e6c9;padding:12px 14px;display:flex;align-items:center;gap:8px;cursor:pointer}
+.dir-head-name{font-size:14px;font-weight:800;color:#0a3d11;flex:1}
+.dir-arrow{font-size:11px;color:#2e7d32;transition:transform .2s}
+.dir-arrow.open{transform:rotate(90deg)}
+.pill{font-size:10px;font-weight:800;padding:3px 8px;border-radius:5px;background:#1b5e20;color:#fff}
+.dir-stats{background:#e8f5e9;padding:10px 14px;display:flex;gap:12px;flex-wrap:wrap}
+.dir-stat{font-size:12px;color:#263238}
+.dir-stat strong{font-weight:800}
+.dir-body{background:#f5f7fa;padding:10px 14px}
+.dir-body.hide{display:none}
+.dir-acts{display:flex;gap:8px;padding:10px 14px;background:#f5f7fa;border-top:1px solid #dce8dc}
+/* ── TOTALS BAND ── */
+.totals-band{background:var(--card);border-radius:12px;padding:12px;margin-top:4px;border:1px solid var(--border)}
+.totals-band .t-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid #eceff1}
+.totals-band .t-row:last-child{border-bottom:none;padding-top:8px;margin-top:4px;border-top:2px solid var(--blue)}
+.totals-band .t-lbl{font-size:12px;font-weight:700;color:var(--muted)}
+.totals-band .t-val{font-size:14px;font-weight:800;color:var(--text)}
+.totals-band .t-val.big{font-size:20px;color:var(--blue)}
+.totals-band .t-val.cord{color:var(--purple)}
+/* ── RESUMEN ── */
+.res-row{cursor:pointer;background:var(--card);border-radius:10px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.res-row:active{background:#f5f7fa}
+.res-info{flex:1;min-width:0}
+.res-name{font-size:14px;font-weight:800;color:var(--text)}
+.res-sub{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
+.res-val{font-size:12px;color:var(--muted);font-weight:600}
+.res-arrow{font-size:12px;color:var(--muted);transition:transform .2s}
+.res-arrow.open{transform:rotate(90deg)}
+.res-detail{background:#eceff1;border-radius:0 0 10px 10px;margin-top:-8px;margin-bottom:8px;overflow:hidden;display:none}
+.res-detail.show{display:block}
+.det-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.det-tbl th{font-size:10px;color:#fff;font-weight:700;padding:6px 8px;background:#37474f;text-align:left}
+.det-tbl th:last-child,.det-tbl td:last-child{text-align:right}
+.det-tbl td{padding:7px 8px;border-bottom:1px solid #ddd;background:#fff;vertical-align:middle}
+.det-tbl tr:last-child td{border-bottom:none}
+/* ── ACUM BLOCKS ── */
+.acum-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.acum-block{background:#e8edf2;border:1px solid #b0bec5;border-radius:12px;padding:12px}
+.acum-title{font-size:10px;font-weight:800;color:#37474f;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #b0bec5}
+.acum-total{font-size:11px;color:var(--muted);font-weight:700}
+.acum-val{font-size:22px;font-weight:800;color:var(--text);line-height:1.1}
+.acum-unit{font-size:11px;color:var(--muted);margin-top:2px}
+.acum-line{display:flex;justify-content:space-between;align-items:baseline;padding:3px 0}
+.acum-line-lbl{font-size:11px;font-weight:700;color:var(--muted)}
+.acum-line-val{font-size:13px;font-weight:800;color:var(--text)}
+.acum-line-val.cord{color:var(--purple)}
+.acum-sep{border-top:1px solid #b0bec5;margin:6px 0;padding-top:6px;display:flex;justify-content:space-between;align-items:baseline}
+.acum-sep-lbl{font-size:11px;font-weight:800;color:var(--blue)}
+.acum-sep-val{font-size:18px;font-weight:800;color:var(--blue)}
+/* ── EMPTY ── */
+.empty{text-align:center;padding:3rem 1rem;color:var(--subtle);font-size:14px;line-height:1.6}
+.empty .ico{font-size:2.5rem;margin-bottom:8px}
+/* ── LADOS ── */
+.lados-wrap{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.lado-box{background:#fff;border:1.5px solid #ef9a9a;border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:10px}
+.lado-box.pos{border-color:#a5d6a7}
+.lado-lbl{font-size:12px;font-weight:800;color:#7f0000;width:72px;flex-shrink:0}
+.lado-lbl.pos{color:#1b5e20}
+.lado-box input{flex:1;font-size:15px;height:36px;border:1.5px solid #90a4ae;border-radius:7px;padding:0 10px;background:#fff;color:var(--text);outline:none}
+/* ── CONFIRM ── */
+.confirm-box{background:#fdecea;border:2px solid #b71c1c;border-radius:12px;padding:14px;margin-bottom:12px;display:none}
+.confirm-box.show{display:block}
+.confirm-box p{font-size:14px;font-weight:700;color:#7f0000;margin-bottom:10px}
+/* ── BTYPE ── */
+.btype{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;color:#fff}
+.btype.p{background:var(--blue)}.btype.c{background:var(--green)}
+/* ── SEC LABEL ── */
+.sec-label{font-size:11px;font-weight:800;color:#37474f;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;margin-top:4px}
+/* scrollbar hide */
+#content::-webkit-scrollbar{display:none}
+#content{scrollbar-width:none}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+    <h1>Calculadora Veredas</h1>
+    <span class="badge" id="rbadge" style="display:none">0</span>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+
+    <!-- ══ PARCIALES ══ -->
+    <div class="panel active" id="panel-p">
+      <div class="card new-dir" id="p-newdir-box">
+        <div class="fld"><label>Nueva dirección</label>
+          <input type="text" id="p-dirinput" placeholder="Ej: Av. San Martín 450" autocomplete="off"></div>
+        <button class="btn blue" onclick="pNewDir()">+ Crear dirección</button>
+      </div>
+
+      <div id="p-active-box" style="display:none">
+        <div class="card active-dir">
+          <div class="dir-label">📍 <span id="p-dirlabel">—</span></div>
+
+          <!-- ÁREA -->
+          <div class="sec default">
+            <div class="sec-title default">Área de vereda</div>
+            <div class="fld"><label>Forma</label>
+              <select id="pa-shape" onchange="pSC()">
+                <option value="rect">Rectángulo</option><option value="tri">Triángulo</option>
+                <option value="trap">Trapecio</option><option value="circ">1/3 Circunferencia</option>
+              </select></div>
+            <div id="pa-dims"></div>
+            <div class="fld"><label>Espesor</label>
+              <select id="pa-esp">
+                <option value="0.08">8 cm</option><option value="0.09">9 cm</option>
+                <option value="0.10" selected>10 cm</option><option value="0.12">12 cm</option><option value="0.13">13 cm</option>
+              </select></div>
+            <div class="btn-row">
+              <button class="btn blue sm" onclick="pAddArea()">+ Agregar</button>
+              <button class="btn outline sm" onclick="pCA()">Limpiar</button>
+            </div>
+          </div>
+
+          <!-- CORDÓN -->
+          <div class="sec cord">
+            <div class="sec-title cord">Cordón</div>
+            <div class="row3">
+              <div class="fld"><label>Base (m)</label><input type="number" id="pc-b" placeholder="0.00" step="0.001" min="0" inputmode="decimal"></div>
+              <div class="fld"><label>Altura (m)</label><input type="number" id="pc-h" placeholder="0.00" step="0.001" min="0" inputmode="decimal"></div>
+              <div class="fld"><label>Longitud (m)</label><input type="number" id="pc-l" placeholder="0.00" step="0.001" min="0" inputmode="decimal"></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn purple sm" onclick="pAddCord()">+ Cordón</button>
+              <button class="btn outline sm" onclick="pCC()">Limpiar</button>
+            </div>
+          </div>
+
+          <!-- PLANTERAS -->
+          <div class="sec plant-pos">
+            <div class="sec-title plant-pos">🌿 Planteras</div>
+            <div class="note pos">Área = Long.1 × Long.2 · Vol. = 0.20 × 0.10 × Σ longitudes</div>
+            <div class="row2">
+              <div class="fld"><label>Cant. lados</label>
+                <select id="ppd-nl" onchange="ppBldL()">
+                  <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+                </select></div>
+              <div class="fld"><label>Volumen</label>
+                <button id="pp-vb" class="btn voloff sm" onclick="ppTV()">Sin volumen</button></div>
+            </div>
+            <div class="lados-wrap" id="ppd-lw"></div>
+            <div class="preview pos" id="ppd-prev" style="display:none">
+              <div class="preview-grid">
+                <div class="preview-item"><label>Área</label><span class="vg" id="ppd-pA">—</span> <small>m²</small></div>
+                <div class="preview-item"><label>Σ long.</label><span class="vg" id="ppd-pL">—</span> <small>m</small></div>
+                <div class="preview-item"><label>Vol.</label><span class="vg" id="ppd-pV">—</span> <small>m³</small></div>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn green2 sm" onclick="pAddPlant()">+ Agregar plantera</button>
+              <button class="btn outline sm" onclick="ppCD()">Limpiar</button>
+            </div>
+          </div>
+
+          <!-- VADO INDIVIDUAL -->
+          <div class="sec trap-sec">
+            <div class="sec-title trap-sec">Vado individual</div>
+            <div class="note trap">Área = ((B+b)/2) × Altura · espesor 9 ó 10 cm</div>
+            <div class="row2">
+              <div class="fld"><label>Base mayor (m)</label><input type="number" id="pt-bm" placeholder="0.00" step="0.001" min="0" inputmode="decimal" oninput="ptUpdPrev()"></div>
+              <div class="fld"><label>Base menor (m)</label><input type="number" id="pt-bme" placeholder="0.00" step="0.001" min="0" inputmode="decimal" oninput="ptUpdPrev()"></div>
+            </div>
+            <div class="row2">
+              <div class="fld"><label>Altura (m)</label><input type="number" id="pt-h" placeholder="0.00" step="0.001" min="0" inputmode="decimal" oninput="ptUpdPrev()"></div>
+              <div class="fld"><label>Espesor</label>
+                <select id="pt-esp" onchange="ptUpdPrev()">
+                  <option value="0.09">9 cm</option><option value="0.10">10 cm</option>
+                </select></div>
+            </div>
+            <div class="preview trap" id="pt-prev" style="display:none">
+              <div class="preview-grid">
+                <div class="preview-item"><label>Área</label><span style="color:#795548;font-weight:800" id="pt-pA">—</span> <small>m²</small></div>
+                <div class="preview-item"><label>Vol.</label><span style="color:#795548;font-weight:800" id="pt-pV">—</span> <small>m³</small></div>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn brown sm" onclick="pAddTrap()">+ Vado indiv.</button>
+              <button class="btn outline sm" onclick="ptClr()">Limpiar</button>
+            </div>
+          </div>
+
+          <!-- VADO UNIFICADO -->
+          <div class="sec circ-sec">
+            <div class="sec-title circ-sec">Vado unificado</div>
+            <div class="note circ">Área segmento circular · Radio y Cuerda · espesor 9 ó 10 cm</div>
+            <div class="row3">
+              <div class="fld"><label>Radio (m)</label><input type="number" id="pci-r" placeholder="0.00" step="0.001" min="0" inputmode="decimal" oninput="pciUpdPrev()"></div>
+              <div class="fld"><label>Cuerda (m)</label><input type="number" id="pci-c" placeholder="0.00" step="0.001" min="0" inputmode="decimal" oninput="pciUpdPrev()"></div>
+              <div class="fld"><label>Espesor</label>
+                <select id="pci-esp" onchange="pciUpdPrev()">
+                  <option value="0.09">9 cm</option><option value="0.10">10 cm</option>
+                </select></div>
+            </div>
+            <div class="preview circ" id="pci-prev" style="display:none">
+              <div class="preview-grid">
+                <div class="preview-item"><label>Área</label><span class="vb" id="pci-pA">—</span> <small>m²</small></div>
+                <div class="preview-item"><label>Vol.</label><span class="vb" id="pci-pV">—</span> <small>m³</small></div>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn indigo sm" onclick="pAddCirc()">+ Vado unif.</button>
+              <button class="btn outline sm" onclick="pciClr()">Limpiar</button>
+            </div>
+          </div>
+
+          <!-- DESCUENTO PLANTERAS -->
+          <div class="sec disc">
+            <div class="sec-title disc">Descuento de planteras</div>
+            <div class="note disc">Área = Long.1 × Long.2 (negativo) · Vol. = 0.20 × 0.10 × Σ long.</div>
+            <div class="row2">
+              <div class="fld"><label>Cant. lados</label>
+                <select id="pd-nl" onchange="pBldL()">
+                  <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option>
+                </select></div>
+              <div class="fld"><label>Volumen</label>
+                <button id="pd-vb" class="btn voloff sm" onclick="pTV()">Sin volumen</button></div>
+            </div>
+            <div class="lados-wrap" id="pd-lw"></div>
+            <div class="preview disc" id="pd-prev" style="display:none">
+              <div class="preview-grid">
+                <div class="preview-item"><label>Área</label><span class="vr" id="pd-pA">—</span> <small>m²</small></div>
+                <div class="preview-item"><label>Σ long.</label><span class="vr" id="pd-pL">—</span> <small>m</small></div>
+                <div class="preview-item"><label>Vol.</label><span class="vr" id="pd-pV">—</span> <small>m³</small></div>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn red sm" onclick="pAddDisc()">+ Desc. plantera</button>
+              <button class="btn outline sm" onclick="pCD()">Limpiar</button>
+            </div>
+          </div>
+
+          <!-- ITEMS -->
+          <div id="p-tw" style="display:none">
+            <div class="sec-label">Ítems agregados</div>
+            <div class="items-list" id="p-tb"></div>
+            <div class="chips" id="p-ch"></div>
+          </div>
+
+          <button class="btn green" style="margin-top:8px" onclick="pClose()">🔒 Cerrar dirección</button>
+        </div>
+      </div>
+
+      <div id="p-cs" style="display:none">
+        <div class="sec-label">Direcciones cerradas</div>
+        <div id="p-cl"></div>
+        <div id="p-tt"></div>
+      </div>
+      <div id="p-em" class="empty"><div class="ico">📍</div>Creá una dirección para empezar</div>
+    </div>
+
+    <!-- ══ COMPLETOS ══ -->
+    <div class="panel" id="panel-c">
+      <div class="card new-dir" id="c-newdir-box">
+        <div class="fld"><label>Nueva dirección</label>
+          <input type="text" id="c-dirinput" placeholder="Ej: Av. San Martín 450" autocomplete="off"></div>
+        <button class="btn blue" onclick="cNewDir()">+ Crear dirección</button>
+      </div>
+
+      <div id="c-active-box" style="display:none">
+        <div class="card active-dir">
+          <div class="dir-label">📍 <span id="c-dirlabel">—</span></div>
+
+          <!-- ÁREA -->
+          <div class="sec default">
+            <div class="sec-title default">Área de vereda</div>
+            <div class="fld"><label>Forma</label>
+              <select id="ca-shape" onchange="cSC()">
+                <option value="rect">Rectángulo</option><option value="trap">Trapecio</option><option value="circ">1/3 Circunferencia</option>
+              </select></div>
+            <div id="ca-dims"></div>
+            <div class="fld"><label>Espesor</label>
+              <select id="ca-esp">
+                <option value="0.08">8 cm — vereda</option><option value="0.09">9 cm</option>
+                <option value="0.12">12 cm — vehicular</option><option value="0.13">13 cm — vehicular</option>
+              </select></div>
+            <div class="btn-row">
+              <button class="btn blue sm" onclick="cAddArea()">+ Agregar</button>
+              <button class="btn outline sm" onclick="cCA()">Limpiar</button>
+            </div>
+          </div>
+
+          <!-- CORDÓN -->
+          <div class="sec cord">
+            <div class="sec-title cord">Cordón</div>
+            <div class="row3">
+              <div class="fld"><label>Base (m)</label><input type="number" id="cc-b" placeholder="0.00" step="0.001" min="0" inputmode="decimal"></div>
+              <div class="fld"><label>Altura (m)</label><input type="number" id="cc-h" placeholder="0.00" step="0.001" min="0" inputmode="decimal"></div>
+              <div class="fld"><label>Longitud (m)</label><input type="number" id="cc-l" placeholder="0.00" step="0.001" min="0" inputmode="decimal"></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn purple sm" onclick="cAddCord()">+ Cordón</button>
+              <button class="btn outline sm" onclick="cCC()">Limpiar</button>
+            </div>
+          </div>
+
+          <!-- DESC PLANTERAS -->
+          <div class="sec disc">
+            <div class="sec-title disc">Descuento de planteras</div>
+            <div class="note disc">Área = Long.1 × Long.2 · Vol. = 0.20 × 0.10 × Σ long.</div>
+            <div class="row2">
+              <div class="fld"><label>Cant. lados</label>
+                <select id="cd-nl" onchange="cBldL()">
+                  <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option>
+                </select></div>
+              <div class="fld"><label>Volumen</label>
+                <button id="cd-vb" class="btn voloff sm" onclick="cTV()">Sin volumen</button></div>
+            </div>
+            <div class="lados-wrap" id="cd-lw"></div>
+            <div class="preview disc" id="cd-prev" style="display:none">
+              <div class="preview-grid">
+                <div class="preview-item"><label>Área</label><span class="vr" id="cd-pA">—</span> <small>m²</small></div>
+                <div class="preview-item"><label>Σ long.</label><span class="vr" id="cd-pL">—</span> <small>m</small></div>
+                <div class="preview-item"><label>Vol.</label><span class="vr" id="cd-pV">—</span> <small>m³</small></div>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn red sm" onclick="cAddDisc()">+ Desc. plantera</button>
+              <button class="btn outline sm" onclick="cCD()">Limpiar</button>
+            </div>
+          </div>
+
+          <!-- DESC TRAPECIO -->
+          <div class="sec disc2">
+            <div class="sec-title disc2">Descuento trapecio</div>
+            <div class="note trap">Área = ((B+b)/2)×h · Vol. = Área × espesor</div>
+            <div class="row2">
+              <div class="fld"><label>Base mayor (m)</label><input type="number" id="cdt-bm" placeholder="0.00" step="0.001" min="0" inputmode="decimal" oninput="cUpdTrap()"></div>
+              <div class="fld"><label>Base menor (m)</label><input type="number" id="cdt-bme" placeholder="0.00" step="0.001" min="0" inputmode="decimal" oninput="cUpdTrap()"></div>
+            </div>
+            <div class="row2">
+              <div class="fld"><label>Altura (m)</label><input type="number" id="cdt-h" placeholder="0.00" step="0.001" min="0" inputmode="decimal" oninput="cUpdTrap()"></div>
+              <div class="fld"><label>Espesor</label>
+                <select id="cdt-esp" onchange="cUpdTrap()"><option value="0.09">9 cm</option><option value="0.10">10 cm</option></select></div>
+            </div>
+            <div class="preview trap" id="cdt-prev" style="display:none">
+              <div class="preview-grid">
+                <div class="preview-item"><label>Área</label><span style="color:#795548;font-weight:800" id="cdt-pA">—</span> <small>m²</small></div>
+                <div class="preview-item"><label>Vol.</label><span style="color:#795548;font-weight:800" id="cdt-pV">—</span> <small>m³</small></div>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn brown sm" onclick="cAddDiscTrap()">+ Desc. trap.</button>
+              <button class="btn outline sm" onclick="cCDT()">Limpiar</button>
+            </div>
+          </div>
+
+          <!-- ITEMS -->
+          <div id="c-tw" style="display:none">
+            <div class="sec-label">Ítems agregados</div>
+            <div class="items-list" id="c-tb"></div>
+            <div class="chips" id="c-ch"></div>
+          </div>
+
+          <button class="btn green" style="margin-top:8px" onclick="cClose()">🔒 Cerrar dirección</button>
+        </div>
+      </div>
+
+      <div id="c-cs" style="display:none">
+        <div class="sec-label">Direcciones cerradas</div>
+        <div id="c-cl"></div>
+        <div id="c-tt"></div>
+      </div>
+      <div id="c-em" class="empty"><div class="ico">📍</div>Creá una dirección para empezar</div>
+    </div>
+
+    <!-- ══ RESUMEN ══ -->
+    <div class="panel" id="panel-r">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+        <button class="btn danger sm" style="width:auto;padding:0 16px" onclick="showBorrar()">🗑 Borrar todo</button>
+      </div>
+      <div class="confirm-box" id="confirm-box">
+        <p>⚠ ¿Borrar TODAS las direcciones y cálculos?</p>
+        <div class="btn-row">
+          <button class="btn danger sm" onclick="borrarTodo()">Sí, borrar todo</button>
+          <button class="btn outline sm" onclick="hideBorrar()">Cancelar</button>
+        </div>
+      </div>
+      <div id="r-em" class="empty"><div class="ico">📋</div>Cerrá direcciones para ver el resumen.</div>
+      <div id="r-co" style="display:none">
+        <div class="sec-label">Registros</div>
+        <div id="r-list"></div>
+        <div class="acum-grid">
+          <div class="acum-block">
+            <div class="acum-title">Acumulado m²</div>
+            <div class="acum-total">Total m² neto</div>
+            <div class="acum-val" id="r-ta">0.0000</div>
+            <div class="acum-unit">m²</div>
+          </div>
+          <div class="acum-block">
+            <div class="acum-title">Acumulado m³</div>
+            <div class="acum-line">
+              <span class="acum-line-lbl">m³ área</span>
+              <span class="acum-line-val" id="r-tv">0.0000</span>
+            </div>
+            <div class="acum-line">
+              <span class="acum-line-lbl" style="color:#311b92">m³ cordón</span>
+              <span class="acum-line-val cord" id="r-tc">0.0000</span>
+            </div>
+            <div class="acum-sep">
+              <span class="acum-sep-lbl">Total m³</span>
+              <span class="acum-sep-val" id="r-ttotal">0.0000</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:8px;text-align:right;font-size:11px;color:var(--subtle)">Registros: <strong id="r-n">0</strong></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- BOTTOM NAV -->
+  <nav id="navbar">
+    <button class="nav-btn active" id="nav-p" onclick="go('p')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Parciales
+    </button>
+    <button class="nav-btn" id="nav-c" onclick="go('c')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      Completos
+    </button>
+    <button class="nav-btn" id="nav-r" onclick="go('r')">
+      <div class="nb">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span class="dot" id="rbadge2" style="display:none">0</span>
+      </div>
+      Resumen
+    </button>
+  </nav>
+</div>
+
+<script>
+var DB=0.20,DH=0.10;
+var SL={rect:'Rectángulo',tri:'Triángulo',trap:'Trapecio',circ:'1/3 Circ.'};
+var ST={rect:'rect',tri:'tri',trap:'trap',circ:'circ'};
+
+function go(t){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('active',p.id==='panel-'+t);});
+  document.querySelectorAll('.nav-btn').forEach(function(b,i){b.classList.toggle('active',['p','c','r'][i]===t);});
+  if(t==='r')rRender();
+}
+function sl(s){return SL[s]||s;}
+function gv(id){var e=document.getElementById(id);return e?parseFloat(e.value)||0:0;}
+function clr(ids){ids.forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});}
+function acalc(s,v){
+  if(s==='rect')return v[0]*v[1];if(s==='tri')return v[0]*v[1]/2;
+  if(s==='trap')return(v[0]+v[1])/2*v[2];
+  if(s==='circ'){var r=v[0],c=v[1];return r*r*Math.asin(Math.min(1,c/(2*r)))-(c/2)*(r-Math.sqrt(Math.max(0,r*r-(c/2)*(c/2))));}
+  return 0;
+}
+function dsStr(s,v){
+  if(s==='rect')return v[0]+'×'+v[1]+' m';if(s==='tri')return 'b='+v[0]+' h='+v[1]+' m';
+  if(s==='trap')return 'B='+v[0]+' b='+v[1]+' h='+v[2]+' m';if(s==='circ')return 'r='+v[0]+' c='+v[1]+' m';return'';
+}
+function pDF(s){
+  if(s==='rect'||s==='tri')return[['pa-f1','Base (m)'],['pa-f2','Altura (m)']];
+  if(s==='trap')return[['pa-f1','Base mayor (m)'],['pa-f2','Base menor (m)'],['pa-f3','Altura (m)']];
+  if(s==='circ')return[['pa-f1','Radio (m)'],['pa-f2','Cuerda (m)']];return[];
+}
+function cDF(s){
+  if(s==='rect')return[['ca-f1','Base (m)'],['ca-f2','Altura (m)']];
+  if(s==='trap')return[['ca-f1','Base mayor (m)'],['ca-f2','Base menor (m)'],['ca-f3','Altura (m)']];
+  if(s==='circ')return[['ca-f1','Radio (m)'],['ca-f2','Cuerda (m)']];return[];
+}
+function tots(its){
+  var aB=0,dA=0,vB=0,vD=0,vPP=0,vC=0,esp=0.10;
+  its.forEach(function(it){
+    if(it.t==='area'||it.t==='ptrap'||it.t==='pcirc'){aB+=it.area;vB+=it.vol;esp=it.esp;}
+    if(it.t==='plant'){aB+=it.area;vB+=it.vol;esp=it.esp;vPP+=it.vP;}
+    if(it.t==='cord')vC+=it.vol;
+    if(it.t==='disc'||it.t==='dtrap'){dA+=it.aT;vD+=it.vP;}
+  });
+  return{aN:aB-dA,vAN:vB-dA*esp,vPP:vPP,vD:vD,vC:vC};
+}
+
+/* LADOS */
+function bldL(pfx){
+  var n=+document.getElementById(pfx+'d-nl').value||1;
+  var w=document.getElementById(pfx+'d-lw');w.innerHTML='';
+  var isPos=(pfx==='pp');
+  for(var i=1;i<=n;i++){
+    var d=document.createElement('div');d.className='lado-box'+(isPos?' pos':'');
+    d.innerHTML='<span class="lado-lbl'+(isPos?' pos':'')+'">Long. '+i+' (m)</span>'
+      +'<input type="number" id="'+pfx+'d-l'+i+'" placeholder="0.00" step="0.001" min="0" inputmode="decimal">';
+    w.appendChild(d);
+    d.querySelector('input').addEventListener('input',function(){
+      if(pfx==='p')pUpdD();else if(pfx==='pp')ppUpdD();else cUpdD();
+    });
+  }
+  if(pfx==='p')pUpdD();else if(pfx==='pp')ppUpdD();else cUpdD();
+}
+function pBldL(){bldL('p');}
+function ppBldL(){bldL('pp');}
+function cBldL(){bldL('c');}
+
+function updD(pfx,hv){
+  var n=+document.getElementById(pfx+'d-nl').value||1,longs=[];
+  for(var i=1;i<=n;i++)longs.push(gv(pfx+'d-l'+i));
+  var l1=longs[0]||0,l2=longs[1]||l1;
+  var aT=l1*l2,sumL=longs.reduce(function(s,v){return s+v;},0),vP=hv?DB*DH*sumL:0;
+  var prev=document.getElementById(pfx+'d-prev');
+  if(prev){prev.style.display=(aT>0||sumL>0)?'block':'none';}
+  var eA=document.getElementById(pfx+'d-pA'),eL=document.getElementById(pfx+'d-pL'),eV=document.getElementById(pfx+'d-pV');
+  if(eA)eA.textContent=aT>0?aT.toFixed(4):'—';
+  if(eL)eL.textContent=sumL>0?sumL.toFixed(3):'—';
+  if(eV)eV.textContent=(hv&&sumL>0)?vP.toFixed(4):'—';
+}
+function pUpdD(){updD('p',pVol);}
+function ppUpdD(){updD('pp',ppVol);}
+function cUpdD(){updD('c',cVol);}
+
+function ptUpdPrev(){
+  var bm=gv('pt-bm'),bme=gv('pt-bme'),h=gv('pt-h');
+  var esp=parseFloat(document.getElementById('pt-esp').value),prev=document.getElementById('pt-prev');
+  if(bm>0&&bme>0&&h>0){var aT=(bm+bme)/2*h;document.getElementById('pt-pA').textContent=aT.toFixed(4);document.getElementById('pt-pV').textContent=(aT*esp).toFixed(4);prev.style.display='block';}
+  else prev.style.display='none';
+}
+function ptClr(){clr(['pt-bm','pt-bme','pt-h']);document.getElementById('pt-prev').style.display='none';}
+function pciUpdPrev(){
+  var r=gv('pci-r'),c=gv('pci-c');
+  var esp=parseFloat(document.getElementById('pci-esp').value),prev=document.getElementById('pci-prev');
+  if(r>0&&c>0&&c<=2*r){
+    var aT=r*r*Math.asin(Math.min(1,c/(2*r)))-(c/2)*(r-Math.sqrt(Math.max(0,r*r-(c/2)*(c/2))));
+    document.getElementById('pci-pA').textContent=aT.toFixed(4);
+    document.getElementById('pci-pV').textContent=(aT*esp).toFixed(4);
+    prev.style.display='block';
+  }else prev.style.display='none';
+}
+function pciClr(){clr(['pci-r','pci-c']);document.getElementById('pci-prev').style.display='none';}
+function cUpdTrap(){
+  var bm=gv('cdt-bm'),bme=gv('cdt-bme'),h=gv('cdt-h');
+  var esp=parseFloat(document.getElementById('cdt-esp').value),prev=document.getElementById('cdt-prev');
+  if(bm>0&&bme>0&&h>0){var aT=(bm+bme)/2*h;document.getElementById('cdt-pA').textContent=aT.toFixed(4);document.getElementById('cdt-pV').textContent=(aT*esp).toFixed(4);prev.style.display='block';}
+  else prev.style.display='none';
+}
+
+/* SHAPE FIELDS */
+function mkDimFields(ids,cont){
+  cont.innerHTML='';
+  ids.forEach(function(f){
+    var d=document.createElement('div');d.className='fld';
+    d.innerHTML='<label>'+f[1]+'</label><input type="number" id="'+f[0]+'" placeholder="0.00" step="0.001" min="0" inputmode="decimal">';
+    cont.appendChild(d);
+  });
+}
+function pSC(){mkDimFields(pDF(document.getElementById('pa-shape').value),document.getElementById('pa-dims'));}
+function cSC(){mkDimFields(cDF(document.getElementById('ca-shape').value),document.getElementById('ca-dims'));}
+function pCA(){clr(['pa-f1','pa-f2','pa-f3']);}
+function pCC(){clr(['pc-b','pc-h','pc-l']);}
+function cCA(){clr(['ca-f1','ca-f2','ca-f3']);}
+function cCC(){clr(['cc-b','cc-h','cc-l']);}
+function ppCD(){
+  clr(['ppd-l1','ppd-l2','ppd-l3','ppd-l4']);
+  document.getElementById('ppd-nl').value='1';bldL('pp');
+  ppVol=false;var b=document.getElementById('pp-vb');b.className='btn voloff sm';b.textContent='Sin volumen';
+  var p=document.getElementById('ppd-prev');if(p)p.style.display='none';
+}
+function ppTV(){ppVol=!ppVol;var b=document.getElementById('pp-vb');b.className='btn '+(ppVol?'volon':'voloff')+' sm';b.textContent=ppVol?'Con volumen':'Sin volumen';ppUpdD();}
+function pCD(){
+  clr(['pd-l1','pd-l2','pd-l3','pd-l4']);
+  document.getElementById('pd-nl').value='2';bldL('p');
+  pVol=false;var b=document.getElementById('pd-vb');b.className='btn voloff sm';b.textContent='Sin volumen';
+  var p=document.getElementById('pd-prev');if(p)p.style.display='none';
+}
+function pTV(){pVol=!pVol;var b=document.getElementById('pd-vb');b.className='btn '+(pVol?'volon':'voloff')+' sm';b.textContent=pVol?'Con volumen':'Sin volumen';pUpdD();}
+function cCD(){
+  clr(['cd-l1','cd-l2','cd-l3','cd-l4']);
+  document.getElementById('cd-nl').value='2';bldL('c');
+  cVol=false;var b=document.getElementById('cd-vb');b.className='btn voloff sm';b.textContent='Sin volumen';
+  var p=document.getElementById('cd-prev');if(p)p.style.display='none';
+}
+function cTV(){cVol=!cVol;var b=document.getElementById('cd-vb');b.className='btn '+(cVol?'volon':'voloff')+' sm';b.textContent=cVol?'Con volumen':'Sin volumen';cUpdD();}
+function cCDT(){clr(['cdt-bm','cdt-bme','cdt-h']);document.getElementById('cdt-prev').style.display='none';}
+
+/* ITEMS LIST */
+function itemHtml(it,i,pfx){
+  var tag='',det='',a='',v='';
+  if(it.t==='area'){tag='<span class="tag '+ST[it.s]+'">'+sl(it.s)+'</span>';det=dsStr(it.s,it.vals)+' · '+it.eL;a=it.area.toFixed(4);v=it.vol.toFixed(4);}
+  else if(it.t==='cord'){tag='<span class="tag cord">Cordón</span>';det=it.b+'×'+it.h+'×'+it.l+' m';a='—';v=it.vol.toFixed(4);}
+  else if(it.t==='plant'){tag='<span class="tag plant">🌿 Plantera</span>';var ls=it.longs.map(function(l,j){return'L'+(j+1)+'='+l+'m';}).join(', ');det=ls;a='<span class="vg">+'+it.area.toFixed(4)+'</span>';v=it.hV?'<span class="vg">+'+it.vP.toFixed(4)+'</span>':'—';}
+  else if(it.t==='ptrap'){tag='<span class="tag ptrap">Vado indiv.</span>';det='B='+it.bm+' b='+it.bme+' h='+it.h+' · '+it.eL;a='<span style="color:#795548;font-weight:800">'+it.area.toFixed(4)+'</span>';v=it.vol.toFixed(4);}
+  else if(it.t==='pcirc'){tag='<span class="tag pcirc">Vado unif.</span>';det='r='+it.r+' c='+it.c+' · '+it.eL;a='<span class="vb">'+it.area.toFixed(4)+'</span>';v=it.vol.toFixed(4);}
+  else if(it.t==='disc'){tag='<span class="tag disc">Desc.Plant.</span>';var ls2=it.longs.map(function(l,j){return'L'+(j+1)+'='+l+'m';}).join(', ');det=ls2;a='<span class="vr">−'+it.aT.toFixed(4)+'</span>';v=it.hV?'<span class="vg">+'+it.vP.toFixed(4)+'</span>':'—';}
+  else if(it.t==='dtrap'){tag='<span class="tag dtrap">Desc.Trap.</span>';det='B='+it.bm+' b='+it.bme+' h='+it.h+' · '+it.eL;a='<span class="vr">−'+it.aT.toFixed(4)+'</span>';v='<span style="color:#795548;font-weight:800">+'+it.vP.toFixed(4)+'</span>';}
+  return '<div class="item-row"><div class="item-info">'+tag+'<div class="item-det">'+det+'</div></div>'
+    +'<div class="item-vals"><div class="v1">'+a+' m²</div><div class="v2">'+v+' m³</div></div>'
+    +'<button class="item-del" onclick="'+pfx+'Del('+i+')">×</button></div>';
+}
+function rTbl(pfx,its){
+  var w=document.getElementById(pfx+'-tw'),tb=document.getElementById(pfx+'-tb'),ch=document.getElementById(pfx+'-ch');
+  if(!its||!its.length){w.style.display='none';return;}
+  w.style.display='block';
+  tb.innerHTML=its.map(function(it,i){return itemHtml(it,i,pfx);}).join('');
+  var t=tots(its);
+  ch.innerHTML='<div class="chip">Área neta: '+t.aN.toFixed(4)+' m²</div>'
+    +'<div class="chip">Vol. área: '+t.vAN.toFixed(4)+' m³</div>'
+    +(t.vPP>0?'<div class="chip pos">Plant. (+): '+t.vPP.toFixed(4)+' m³</div>':'')
+    +(t.vD>0?'<div class="chip dv">Desc. (+): '+t.vD.toFixed(4)+' m³</div>':'')
+    +(t.vC>0?'<div class="chip cord">Cord.: '+t.vC.toFixed(4)+' m³</div>':'');
+}
+
+/* CLOSED DIRS */
+function rClosed(pfx,list){
+  var sec=document.getElementById(pfx+'-cs'),cl=document.getElementById(pfx+'-cl');
+  var em=document.getElementById(pfx+'-em'),ab=document.getElementById(pfx+'-active-box');
+  if(!list.length){sec.style.display='none';if(ab.style.display==='none')em.style.display='block';return;}
+  sec.style.display='block';em.style.display='none';
+  cl.innerHTML=list.map(function(d,i){
+    var t=d.tot;
+    var rows=d.its.map(function(it){
+      var tag='',det='',aS='',vS='';
+      if(it.t==='area'){tag='<span class="tag '+ST[it.s]+'">'+sl(it.s)+'</span>';det=dsStr(it.s,it.vals)+' · '+it.eL;aS=it.area.toFixed(4);vS=it.vol.toFixed(4);}
+      else if(it.t==='cord'){tag='<span class="tag cord">Cordón</span>';det=it.b+'×'+it.h+'×'+it.l;aS='—';vS=it.vol.toFixed(4);}
+      else if(it.t==='plant'){tag='<span class="tag plant">🌿</span>';var ls=it.longs.map(function(l,j){return'L'+(j+1)+'='+l;}).join(' ');det=ls;aS='<span class="vg">+'+it.area.toFixed(4)+'</span>';vS=it.hV?'+'+it.vP.toFixed(4):'—';}
+      else if(it.t==='ptrap'){tag='<span class="tag ptrap">Vado I.</span>';det='B='+it.bm+' b='+it.bme+' h='+it.h;aS=it.area.toFixed(4);vS=it.vol.toFixed(4);}
+      else if(it.t==='pcirc'){tag='<span class="tag pcirc">Vado U.</span>';det='r='+it.r+' c='+it.c;aS=it.area.toFixed(4);vS=it.vol.toFixed(4);}
+      else if(it.t==='disc'){tag='<span class="tag disc">Desc.P</span>';var ls2=it.longs.map(function(l,j){return'L'+(j+1)+'='+l;}).join(' ');det=ls2;aS='<span class="vr">−'+it.aT.toFixed(4)+'</span>';vS=it.hV?'+'+it.vP.toFixed(4):'—';}
+      else if(it.t==='dtrap'){tag='<span class="tag dtrap">Desc.T</span>';det='B='+it.bm+' b='+it.bme+' h='+it.h;aS='<span class="vr">−'+it.aT.toFixed(4)+'</span>';vS='+'+it.vP.toFixed(4);}
+      return'<tr><td>'+tag+'</td><td style="font-size:11px;color:#37474f">'+det+'</td><td style="text-align:right">'+aS+'</td><td style="text-align:right">'+vS+'</td></tr>';
+    }).join('');
+    return'<div class="dir-card">'
+      +'<div class="dir-head" onclick="tog(\''+pfx+'-bd-'+i+'\')">'
+      +'<div class="dir-head-name">📍 '+d.name+'</div>'
+      +'<span class="pill">Cerrada</span>'
+      +'<span class="dir-arrow" id="'+pfx+'-arr-'+i+'">▶</span>'
+      +'</div>'
+      +'<div class="dir-stats">'
+      +'<span class="dir-stat"><strong>'+t.aN.toFixed(4)+'</strong> m²</span>'
+      +'<span class="dir-stat"><strong>'+t.vAN.toFixed(4)+'</strong> m³</span>'
+      +(t.vPP>0?'<span class="dir-stat" style="color:#1b5e20"><strong>'+t.vPP.toFixed(4)+'</strong> plant.</span>':'')
+      +(t.vD>0?'<span class="dir-stat" style="color:#bf360c"><strong>'+t.vD.toFixed(4)+'</strong> desc.</span>':'')
+      +(t.vC>0?'<span class="dir-stat" style="color:#311b92"><strong>'+t.vC.toFixed(4)+'</strong> cord.</span>':'')
+      +'</div>'
+      +'<div class="dir-body hide" id="'+pfx+'-bd-'+i+'">'
+      +'<table class="det-tbl"><thead><tr><th>Tipo</th><th>Detalle</th><th>Área</th><th>Vol.</th></tr></thead><tbody>'+rows+'</tbody></table>'
+      +'</div>'
+      +'<div class="dir-acts">'
+      +'<button class="btn amber sm" style="flex:1" onclick="reopen(\''+pfx+'\','+i+')">🔓 Reabrir</button>'
+      +'<button class="btn red sm" style="flex:1" onclick="delDir(\''+pfx+'\','+i+')">🗑 Eliminar</button>'
+      +'</div></div>';
+  }).join('');
+  var gA=list.reduce(function(s,d){return s+d.tot.aN;},0),gV=list.reduce(function(s,d){return s+d.tot.vAN;},0);
+  var gPP=list.reduce(function(s,d){return s+d.tot.vPP;},0),gD=list.reduce(function(s,d){return s+d.tot.vD;},0),gC=list.reduce(function(s,d){return s+d.tot.vC;},0);
+  document.getElementById(pfx+'-tt').innerHTML=
+    '<div class="totals-band" style="margin-bottom:12px">'
+    +'<div class="t-row"><span class="t-lbl">Área neta</span><span class="t-val">'+gA.toFixed(4)+' m²</span></div>'
+    +'<div class="t-row"><span class="t-lbl">Vol. área</span><span class="t-val">'+gV.toFixed(4)+' m³</span></div>'
+    +(gPP>0?'<div class="t-row"><span class="t-lbl" style="color:#1b5e20">Plant. (+)</span><span class="t-val" style="color:#1b5e20">'+gPP.toFixed(4)+' m³</span></div>':'')
+    +(gD>0?'<div class="t-row"><span class="t-lbl" style="color:#bf360c">Desc. (+)</span><span class="t-val" style="color:#bf360c">'+gD.toFixed(4)+' m³</span></div>':'')
+    +(gC>0?'<div class="t-row"><span class="t-lbl" style="color:#311b92">Cordones</span><span class="t-val cord">'+gC.toFixed(4)+' m³</span></div>':'')
+    +'<div class="t-row"><span class="t-lbl">Direcciones</span><span class="t-val big">'+list.length+'</span></div>'
+    +'</div>';
+}
+function tog(id){
+  var e=document.getElementById(id);if(!e)return;
+  var open=!e.classList.contains('hide');
+  e.classList.toggle('hide');
+  var arr=document.getElementById(id.replace('-bd-','-arr-'));
+  if(arr)arr.classList.toggle('open',open);
+}
+function reopen(pfx,i){
+  var list=pfx==='p'?pCl:cCl,d=list[i];
+  if(pfx==='p'){if(pIt!==null){alert('Cerrá la dirección activa primero.');return;}pNm=d.name;pIt=d.its.slice();pCl.splice(i,1);openP();}
+  else{if(cIt!==null){alert('Cerrá la dirección activa primero.');return;}cNm=d.name;cIt=d.its.slice();cCl.splice(i,1);openC();}
+  rClosed(pfx,pfx==='p'?pCl:cCl);upB();
+}
+function delDir(pfx,i){
+  var list=pfx==='p'?pCl:cCl;
+  if(!confirm('¿Eliminar "'+list[i].name+'"?'))return;
+  list.splice(i,1);rClosed(pfx,list);upB();
+}
+
+/* ═══ PARCIALES ═══ */
+var pNm='',pIt=null,pVol=false,ppVol=false,pCl=[];
+function pNewDir(){
+  var nm=document.getElementById('p-dirinput').value.trim();
+  if(!nm){alert('Ingresá una dirección.');return;}
+  if(pCl.find(function(d){return d.name.toLowerCase()===nm.toLowerCase();})){alert('Ya existe esa dirección cerrada.');return;}
+  pNm=nm;pIt=[];document.getElementById('p-dirinput').value='';openP();
+}
+function openP(){
+  document.getElementById('p-newdir-box').style.display='none';
+  document.getElementById('p-active-box').style.display='block';
+  document.getElementById('p-dirlabel').textContent=pNm;
+  document.getElementById('p-em').style.display='none';
+  pSC();pCA();pCC();ppCD();ptClr();pciClr();pCD();rTbl('p',pIt);
+}
+function pDel(i){pIt.splice(i,1);rTbl('p',pIt);}
+function pAddArea(){
+  if(pIt===null)return;
+  var s=document.getElementById('pa-shape').value,vals=pDF(s).map(function(f){return gv(f[0]);});
+  if(vals.some(function(v){return v<=0;})){alert('Ingresá todos los valores.');return;}
+  var eEl=document.getElementById('pa-esp'),esp=parseFloat(eEl.value),eL=eEl.options[eEl.selectedIndex].text;
+  pIt.push({t:'area',s:s,vals:vals,area:acalc(s,vals),vol:acalc(s,vals)*esp,esp:esp,eL:eL});pCA();rTbl('p',pIt);
+}
+function pAddCord(){
+  if(pIt===null)return;var b=gv('pc-b'),h=gv('pc-h'),l=gv('pc-l');
+  if(!b||!h||!l){alert('Ingresá base, altura y longitud.');return;}
+  pIt.push({t:'cord',b:b,h:h,l:l,vol:b*h*l});pCC();rTbl('p',pIt);
+}
+function pAddPlant(){
+  if(pIt===null)return;
+  var n=+document.getElementById('ppd-nl').value||1,longs=[],sumL=0;
+  for(var i=1;i<=n;i++){var l=gv('ppd-l'+i);if(!l){alert('Ingresá la longitud '+i+'.');return;}longs.push(l);sumL+=l;}
+  var l1=longs[0],l2=longs[1]||longs[0];
+  var area=l1*l2,vP=ppVol?DB*DH*sumL:0;
+  var lastArea=pIt.slice().reverse().find(function(x){return x.t==='area'||x.t==='ptrap'||x.t==='pcirc';});
+  var esp=lastArea?lastArea.esp:0.10;
+  pIt.push({t:'plant',longs:longs,sumL:sumL,area:area,vol:area*esp,esp:esp,hV:ppVol,vP:vP});
+  ppCD();rTbl('p',pIt);
+}
+function pAddTrap(){
+  if(pIt===null)return;
+  var bm=gv('pt-bm'),bme=gv('pt-bme'),h=gv('pt-h');
+  if(!bm||!bme||!h){alert('Ingresá base mayor, base menor y altura.');return;}
+  var espEl=document.getElementById('pt-esp'),esp=parseFloat(espEl.value),eL=espEl.options[espEl.selectedIndex].text;
+  var area=(bm+bme)/2*h;
+  pIt.push({t:'ptrap',bm:bm,bme:bme,h:h,area:area,vol:area*esp,esp:esp,eL:eL});ptClr();rTbl('p',pIt);
+}
+function pAddCirc(){
+  if(pIt===null)return;
+  var r=gv('pci-r'),c=gv('pci-c');
+  if(!r||!c){alert('Ingresá radio y cuerda.');return;}
+  if(c>2*r){alert('La cuerda no puede ser mayor que el diámetro (2×radio).');return;}
+  var espEl=document.getElementById('pci-esp'),esp=parseFloat(espEl.value),eL=espEl.options[espEl.selectedIndex].text;
+  var area=r*r*Math.asin(Math.min(1,c/(2*r)))-(c/2)*(r-Math.sqrt(Math.max(0,r*r-(c/2)*(c/2))));
+  pIt.push({t:'pcirc',r:r,c:c,area:area,vol:area*esp,esp:esp,eL:eL});pciClr();rTbl('p',pIt);
+}
+function pAddDisc(){
+  if(pIt===null)return;
+  var n=+document.getElementById('pd-nl').value||2,longs=[],sumL=0;
+  for(var i=1;i<=n;i++){var l=gv('pd-l'+i);if(!l){alert('Ingresá la longitud '+i+'.');return;}longs.push(l);sumL+=l;}
+  var l1=longs[0],l2=longs[1]||longs[0],aT=l1*l2;
+  var aAc=pIt.filter(function(x){return x.t==='area'||x.t==='plant'||x.t==='ptrap'||x.t==='pcirc';}).reduce(function(s,x){return s+x.area;},0);
+  var dAc=pIt.filter(function(x){return x.t==='disc'||x.t==='dtrap';}).reduce(function(s,x){return s+x.aT;},0);
+  if(aT>=(aAc-dAc)){alert('El descuento supera el área neta disponible.');return;}
+  pIt.push({t:'disc',longs:longs,sumL:sumL,aT:aT,hV:pVol,vP:pVol?DB*DH*sumL:0});
+  pCD();rTbl('p',pIt);
+}
+function pClose(){
+  if(!pIt||!pIt.length){alert('Agregá al menos un ítem antes de cerrar.');return;}
+  pCl.push({name:pNm,its:pIt.slice(),tot:tots(pIt)});
+  pIt=null;pNm='';pVol=false;ppVol=false;
+  document.getElementById('p-active-box').style.display='none';
+  document.getElementById('p-tw').style.display='none';
+  document.getElementById('p-tb').innerHTML='';document.getElementById('p-ch').innerHTML='';
+  document.getElementById('p-newdir-box').style.display='block';
+  document.getElementById('p-dirinput').value='';
+  document.getElementById('pa-shape').value='rect';
+  pSC();pCA();pCC();ppCD();ptClr();pciClr();pCD();rClosed('p',pCl);upB();
+}
+
+/* ═══ COMPLETOS ═══ */
+var cNm='',cIt=null,cVol=false,cCl=[];
+function cNewDir(){
+  var nm=document.getElementById('c-dirinput').value.trim();
+  if(!nm){alert('Ingresá una dirección.');return;}
+  if(cCl.find(function(d){return d.name.toLowerCase()===nm.toLowerCase();})){alert('Ya existe esa dirección cerrada.');return;}
+  cNm=nm;cIt=[];document.getElementById('c-dirinput').value='';openC();
+}
+function openC(){
+  document.getElementById('c-newdir-box').style.display='none';
+  document.getElementById('c-active-box').style.display='block';
+  document.getElementById('c-dirlabel').textContent=cNm;
+  document.getElementById('c-em').style.display='none';
+  cSC();cCA();cCC();cCD();cCDT();rTbl('c',cIt);
+}
+function cDel(i){cIt.splice(i,1);rTbl('c',cIt);}
+function cAddArea(){
+  if(cIt===null)return;
+  var s=document.getElementById('ca-shape').value,vals=cDF(s).map(function(f){return gv(f[0]);});
+  if(vals.some(function(v){return v<=0;})){alert('Ingresá todos los valores.');return;}
+  var eEl=document.getElementById('ca-esp'),esp=parseFloat(eEl.value),eL=eEl.options[eEl.selectedIndex].text;
+  cIt.push({t:'area',s:s,vals:vals,area:acalc(s,vals),vol:acalc(s,vals)*esp,esp:esp,eL:eL});cCA();rTbl('c',cIt);
+}
+function cAddCord(){
+  if(cIt===null)return;var b=gv('cc-b'),h=gv('cc-h'),l=gv('cc-l');
+  if(!b||!h||!l){alert('Ingresá base, altura y longitud.');return;}
+  cIt.push({t:'cord',b:b,h:h,l:l,vol:b*h*l});cCC();rTbl('c',cIt);
+}
+function cAddDisc(){
+  if(cIt===null)return;
+  var n=+document.getElementById('cd-nl').value||2,longs=[],sumL=0;
+  for(var i=1;i<=n;i++){var l=gv('cd-l'+i);if(!l){alert('Ingresá la longitud '+i+'.');return;}longs.push(l);sumL+=l;}
+  var l1=longs[0],l2=longs[1]||longs[0],aT=l1*l2;
+  var aAc=cIt.filter(function(x){return x.t==='area';}).reduce(function(s,x){return s+x.area;},0);
+  var dAc=cIt.filter(function(x){return x.t==='disc'||x.t==='dtrap';}).reduce(function(s,x){return s+x.aT;},0);
+  if(aT>=(aAc-dAc)){alert('El descuento supera el área neta disponible.');return;}
+  cIt.push({t:'disc',longs:longs,sumL:sumL,aT:aT,hV:cVol,vP:cVol?DB*DH*sumL:0});cCD();rTbl('c',cIt);
+}
+function cAddDiscTrap(){
+  if(cIt===null)return;
+  var bm=gv('cdt-bm'),bme=gv('cdt-bme'),h=gv('cdt-h');
+  if(!bm||!bme||!h){alert('Ingresá base mayor, base menor y altura.');return;}
+  var espEl=document.getElementById('cdt-esp'),esp=parseFloat(espEl.value),eL=espEl.options[espEl.selectedIndex].text;
+  var aT=(bm+bme)/2*h;
+  var aAc=cIt.filter(function(x){return x.t==='area';}).reduce(function(s,x){return s+x.area;},0);
+  var dAc=cIt.filter(function(x){return x.t==='disc'||x.t==='dtrap';}).reduce(function(s,x){return s+x.aT;},0);
+  if(aT>=(aAc-dAc)){alert('El descuento supera el área neta disponible.');return;}
+  cIt.push({t:'dtrap',bm:bm,bme:bme,h:h,esp:esp,eL:eL,aT:aT,vP:aT*esp});cCDT();rTbl('c',cIt);
+}
+function cClose(){
+  if(!cIt||!cIt.length){alert('Agregá al menos un ítem antes de cerrar.');return;}
+  cCl.push({name:cNm,its:cIt.slice(),tot:tots(cIt)});
+  cIt=null;cNm='';cVol=false;
+  document.getElementById('c-active-box').style.display='none';document.getElementById('c-tw').style.display='none';
+  document.getElementById('c-tb').innerHTML='';document.getElementById('c-ch').innerHTML='';
+  document.getElementById('c-newdir-box').style.display='block';document.getElementById('c-dirinput').value='';
+  document.getElementById('ca-shape').value='rect';
+  cSC();cCA();cCC();cCD();cCDT();rClosed('c',cCl);upB();
+}
+
+/* ═══ RESUMEN ═══ */
+function rRender(){
+  var all=pCl.map(function(d){return{name:d.name,tot:d.tot,src:'p'};}).concat(cCl.map(function(d){return{name:d.name,tot:d.tot,src:'c'};}));
+  var em=document.getElementById('r-em'),co=document.getElementById('r-co');
+  if(!all.length){em.style.display='block';co.style.display='none';return;}
+  em.style.display='none';co.style.display='block';
+  document.getElementById('r-list').innerHTML=all.map(function(d,i){
+    var src=d.src==='p'?pCl:cCl;
+    var dirData=src.find(function(x){return x.name===d.name;});
+    var its=dirData?dirData.its:[];
+    var detRows=its.map(function(it){
+      var tag='',det='',aS='',vS='';
+      if(it.t==='area'){tag='<span class="tag '+ST[it.s]+'">'+sl(it.s)+'</span>';det=dsStr(it.s,it.vals)+' · '+it.eL;aS=it.area.toFixed(4);vS=it.vol.toFixed(4);}
+      else if(it.t==='cord'){tag='<span class="tag cord">Cordón</span>';det=it.b+'×'+it.h+'×'+it.l+' m';aS='—';vS=it.vol.toFixed(4);}
+      else if(it.t==='plant'){tag='<span class="tag plant">🌿 Plantera</span>';var ls=it.longs.map(function(l,j){return'L'+(j+1)+'='+l+'m';}).join(', ');det=ls;aS='<span class="vg">+'+it.area.toFixed(4)+'</span>';vS=it.hV?'<span class="vg">+'+it.vP.toFixed(4)+'</span>':'—';}
+      else if(it.t==='ptrap'){tag='<span class="tag ptrap">Vado indiv.</span>';det='B='+it.bm+' b='+it.bme+' h='+it.h+' · '+it.eL;aS='<span style="color:#795548;font-weight:800">'+it.area.toFixed(4)+'</span>';vS=it.vol.toFixed(4);}
+      else if(it.t==='pcirc'){tag='<span class="tag pcirc">Vado unif.</span>';det='r='+it.r+' c='+it.c+' · '+it.eL;aS='<span class="vb">'+it.area.toFixed(4)+'</span>';vS=it.vol.toFixed(4);}
+      else if(it.t==='disc'){tag='<span class="tag disc">Desc.Plant.</span>';var ls2=it.longs.map(function(l,j){return'L'+(j+1)+'='+l+'m';}).join(', ');det=ls2;aS='<span class="vr">−'+it.aT.toFixed(4)+'</span>';vS=it.hV?'<span class="vg">+'+it.vP.toFixed(4)+'</span>':'—';}
+      else if(it.t==='dtrap'){tag='<span class="tag dtrap">Desc.Trap.</span>';det='B='+it.bm+' b='+it.bme+' h='+it.h+' · '+it.eL;aS='<span class="vr">−'+it.aT.toFixed(4)+'</span>';vS='<span style="color:#795548;font-weight:800">+'+it.vP.toFixed(4)+'</span>';}
+      return'<tr><td>'+tag+'</td><td style="font-size:11px;color:#37474f">'+det+'</td><td style="text-align:right">'+aS+'</td><td style="text-align:right">'+vS+'</td></tr>';
+    }).join('');
+    return'<div class="res-row" onclick="rTog('+i+')">'
+      +'<div class="res-info">'
+      +'<div class="res-name">📍 '+d.name+'</div>'
+      +'<div class="res-sub">'
+      +'<span class="btype '+d.src+'">'+(d.src==='p'?'Parcial':'Completo')+'</span>'
+      +'<span class="res-val">'+d.tot.aN.toFixed(4)+' m²</span>'
+      +'<span class="res-val">'+d.tot.vAN.toFixed(4)+' m³</span>'
+      +'</div></div>'
+      +'<div style="display:flex;align-items:center;gap:6px">'
+      +'<span class="res-arrow" id="r-arr-'+i+'">▶</span>'
+      +'<button class="btn red sm" style="width:auto;padding:0 10px;margin:0" onclick="event.stopPropagation();rDel('+i+')">🗑</button>'
+      +'</div></div>'
+      +'<div class="res-detail" id="r-det-'+i+'">'
+      +'<table class="det-tbl"><thead><tr><th>Tipo</th><th>Detalle</th><th>Área m²</th><th>Vol. m³</th></tr></thead>'
+      +'<tbody>'+detRows+'</tbody></table></div>';
+  }).join('');
+  var tA=all.reduce(function(s,d){return s+d.tot.aN;},0),tV=all.reduce(function(s,d){return s+d.tot.vAN;},0);
+  var tC=all.reduce(function(s,d){return s+d.tot.vC;},0),tTotal=tV+tC;
+  document.getElementById('r-ta').textContent=tA.toFixed(4);
+  document.getElementById('r-tv').textContent=tV.toFixed(4);
+  document.getElementById('r-tc').textContent=tC.toFixed(4);
+  document.getElementById('r-ttotal').textContent=tTotal.toFixed(4);
+  document.getElementById('r-n').textContent=all.length;
+}
+function rTog(i){
+  var det=document.getElementById('r-det-'+i),arr=document.getElementById('r-arr-'+i);
+  if(!det)return;
+  var open=det.classList.contains('show');
+  det.classList.toggle('show',!open);
+  if(arr)arr.classList.toggle('open',!open);
+}
+function rDel(i){
+  var all=pCl.map(function(d){return{name:d.name,src:'p'};}).concat(cCl.map(function(d){return{name:d.name,src:'c'};}));
+  var d=all[i];if(!confirm('¿Eliminar "'+d.name+'"?'))return;
+  if(d.src==='p')pCl.splice(pCl.findIndex(function(x){return x.name===d.name;}),1);
+  else cCl.splice(cCl.findIndex(function(x){return x.name===d.name;}),1);
+  rClosed('p',pCl);rClosed('c',cCl);rRender();upB();
+}
+function showBorrar(){document.getElementById('confirm-box').classList.add('show');}
+function hideBorrar(){document.getElementById('confirm-box').classList.remove('show');}
+function borrarTodo(){
+  pNm='';pIt=null;pVol=false;ppVol=false;pCl=[];cNm='';cIt=null;cVol=false;cCl=[];
+  document.getElementById('p-active-box').style.display='none';document.getElementById('p-tw').style.display='none';
+  document.getElementById('p-tb').innerHTML='';document.getElementById('p-ch').innerHTML='';
+  document.getElementById('p-newdir-box').style.display='block';document.getElementById('p-dirinput').value='';
+  document.getElementById('pa-shape').value='rect';
+  document.getElementById('c-active-box').style.display='none';document.getElementById('c-tw').style.display='none';
+  document.getElementById('c-tb').innerHTML='';document.getElementById('c-ch').innerHTML='';
+  document.getElementById('c-newdir-box').style.display='block';document.getElementById('c-dirinput').value='';
+  document.getElementById('ca-shape').value='rect';
+  pSC();pCA();pCC();ppCD();ptClr();pciClr();pCD();cSC();cCA();cCC();cCD();cCDT();
+  rClosed('p',pCl);rClosed('c',cCl);hideBorrar();upB();rRender();
+}
+function upB(){
+  var n=pCl.length+cCl.length;
+  var b1=document.getElementById('rbadge'),b2=document.getElementById('rbadge2');
+  b1.style.display=n?'inline':'none';b1.textContent=n;
+  b2.style.display=n?'inline':'none';b2.textContent=n;
+}
+
+pSC();cSC();bldL('p');bldL('pp');bldL('c');
+</script>
+</body>
+</html>
