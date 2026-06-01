@@ -1,0 +1,13 @@
+{
+  "background_color": "#1a237e",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Calc Veredas",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Calc Veredas",
+  "start_url": "/",
+  "theme_color": "#1a237e",
+  "id": "com.veredas.calculadora",
+  "description": "Calculadora de áreas y volúmenes para veredas"
+}
